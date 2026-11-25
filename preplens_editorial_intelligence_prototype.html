@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PrepLens — AI Editorial Intelligence for Competitive Exams</title>
-  <!-- Tailwind CSS CDN -->
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font: Inter -->
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -31,17 +31,17 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-100 selection:text-navy-900">
 
-  <!-- Toast Notification Container -->
+ 
   <div id="toast-container" aria-live="polite" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
 
-  <!-- Mobile Sidebar Backdrop -->
+  
   <div id="mobile-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
 
   <div class="min-h-screen flex">
-    <!-- Persistent Left Sidebar Navigation -->
+    
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-navy-900 text-slate-100 flex flex-col justify-between transform -translate-x-full transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:shrink-0">
       <div>
-        <!-- Brand Header -->
+        
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
           <div class="flex items-center gap-2.5">
             <div class="h-8 w-8 rounded-lg bg-amber-400 text-navy-900 flex items-center justify-center font-bold text-sm shadow-xs">
@@ -57,7 +57,7 @@
           </button>
         </div>
 
-        <!-- Primary Navigation Links -->
+        
         <nav aria-label="Main Navigation" class="p-3 space-y-1">
           <button type="button" data-nav="dashboard" onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -102,7 +102,7 @@
         </nav>
       </div>
 
-      <!-- Footer Compliance Note -->
+      
       <div class="p-4 border-t border-slate-800 space-y-2">
         <div class="rounded-xl bg-navy-800 p-3 text-xs text-slate-300 space-y-1">
           <p class="font-semibold text-amber-300">Aggregation Policy</p>
@@ -113,12 +113,12 @@
       </div>
     </aside>
 
-    <!-- Main Workspace Column -->
+    
     <div class="flex-1 flex flex-col min-w-0">
-      <!-- Top Header -->
+      
       <header class="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 sm:px-6 py-3">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <!-- Mobile Menu Toggle + Global Search -->
+          
           <div class="flex items-center gap-3 flex-1 max-w-2xl">
             <button type="button" onclick="toggleSidebar(true)" aria-label="Open navigation" class="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -136,7 +136,7 @@
             </form>
           </div>
 
-          <!-- Exam Selector & Aspirant Profile -->
+          
           <div class="flex items-center gap-2.5 shrink-0">
             <label for="exam-selector" class="sr-only">Target Examination</label>
             <select
@@ -160,7 +160,7 @@
         </div>
       </header>
 
-      <!-- Global SRS Compliance & Demo Banner -->
+      
       <div class="bg-amber-50/90 border-b border-amber-200 px-4 sm:px-6 py-2">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950">
           <div class="flex items-center gap-2">
@@ -179,9 +179,7 @@
   </div>
 
   <script>
-    /* =========================================================================
-       1. SAMPLE DATA REPOSITORY (SRS-COMPLIANT METADATA & AI SYNTHESIS)
-       ========================================================================= */
+    
     const TOPICS_DATA = [
       {
         id: "india-china",
@@ -700,14 +698,12 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch {
-        // Ignore storage quota errors in restricted sandboxes
+       
       }
       updateSidebarCounters();
     }
 
-    /* =========================================================================
-       3. UI HELPERS (TOASTS, NAVIGATION, AI DISCLAIMER BADGE)
-       ========================================================================= */
+
     function showToast(message) {
       const container = document.getElementById("toast-container");
       const el = document.createElement("div");
@@ -789,9 +785,7 @@
       render();
     }
 
-    /* =========================================================================
-       4. ACTIONS (BOOKMARKS, READ TRACKING, NOTES, MCQs)
-       ========================================================================= */
+   
     function toggleBookmark(articleId) {
       const idx = state.bookmarkedArticleIds.indexOf(articleId);
       if (idx === -1) {
@@ -883,9 +877,7 @@
       render();
     }
 
-    /* =========================================================================
-       5. VIEW RENDERERS
-       ========================================================================= */
+   
     function renderDashboardView() {
       const quickTopics = ["Climate Change", "India-China Relations", "Semiconductor Mission", "One Nation, One Election"];
       const trending = TOPICS_DATA;
@@ -1627,11 +1619,9 @@
       `;
     }
 
-    /* =========================================================================
-       6. MAIN RENDER LOOP & INITIALIZATION
-       ========================================================================= */
+    
     function render() {
-      // Highlight active navigation link
+     
       document.querySelectorAll(".nav-btn").forEach((btn) => {
         const isActive = btn.getAttribute("data-nav") === state.activeRoute;
         btn.className = `nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left ${
