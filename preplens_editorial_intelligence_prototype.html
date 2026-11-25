@@ -1,1 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrepLens — AI Editorial Intelligence for Competitive Exams</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              900: '#0B1F3A',
+              800: '#132D52',
+              700: '#1D4275',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-100 selection:text-navy-900">
 
+  <!-- Toast Notification Container -->
+  <div id="toast-container" aria-live="polite" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="mobile-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
+
+  <div class="min-h-screen flex">
+    <!-- Persistent Left Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-navy-900 text-slate-100 flex flex-col justify-between transform -translate-x-full transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:shrink-0">
+      <div>
+        <!-- Brand Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <div class="h-8 w-8 rounded-lg bg-amber-400 text-navy-900 flex items-center justify-center font-bold text-sm shadow-xs">
+              PL
+            </div>
+            <div>
+              <span class="text-lg font-bold tracking-tight text-white block leading-none">PrepLens</span>
+              <span class="text-[11px] text-slate-400">Editorial Intelligence</span>
+            </div>
+          </div>
+          <button type="button" onclick="toggleSidebar(false)" aria-label="Close navigation" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Primary Navigation Links -->
+        <nav aria-label="Main Navigation" class="p-3 space-y-1">
+          <button type="button" data-nav="dashboard" onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Dashboard</span>
+          </button>
+
+          <button type="button" data-nav="search" onclick="navigate('search')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>Search &amp; Editorials</span>
+          </button>
+
+          <button type="button" data-nav="compare" onclick="navigate('compare')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            <span>Compare Viewpoints</span>
+          </button>
+
+          <button type="button" data-nav="digest" onclick="navigate('digest')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+            <span>Daily Digest</span>
+          </button>
+
+          <button type="button" data-nav="bookmarks" onclick="navigate('bookmarks')" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <span class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              <span>Bookmarks</span>
+            </span>
+            <span id="sidebar-bookmark-count" class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300">0</span>
+          </button>
+
+          <button type="button" data-nav="notes" onclick="navigate('notes')" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <span class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Notes &amp; Mains Lab</span>
+            </span>
+            <span id="sidebar-notes-count" class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300">0</span>
+          </button>
+
+          <button type="button" data-nav="practice" onclick="navigate('practice')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Practice Questions</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Footer Compliance Note -->
+      <div class="p-4 border-t border-slate-800 space-y-2">
+        <div class="rounded-xl bg-navy-800 p-3 text-xs text-slate-300 space-y-1">
+          <p class="font-semibold text-amber-300">Aggregation Policy</p>
+          <p class="text-[11px] leading-relaxed text-slate-300">
+            PrepLens provides AI synthesis and links to permitted sources. Full copyrighted text is never republished.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Header -->
+      <header class="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 sm:px-6 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <!-- Mobile Menu Toggle + Global Search -->
+          <div class="flex items-center gap-3 flex-1 max-w-2xl">
+            <button type="button" onclick="toggleSidebar(true)" aria-label="Open navigation" class="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+
+            <form onsubmit="handleGlobalSearch(event)" class="relative flex-1">
+              <label for="global-search-input" class="sr-only">Search any topic, issue or current affair</label>
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input
+                id="global-search-input"
+                type="search"
+                placeholder="Search any topic, issue or current affair..."
+                class="w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-navy-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+              />
+            </form>
+          </div>
+
+          <!-- Exam Selector & Aspirant Profile -->
+          <div class="flex items-center gap-2.5 shrink-0">
+            <label for="exam-selector" class="sr-only">Target Examination</label>
+            <select
+              id="exam-selector"
+              onchange="handleExamChange(this.value)"
+              class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-navy-900 focus:border-navy-700 focus:outline-none"
+            >
+              <option value="UPSC CSE">UPSC CSE</option>
+              <option value="State PSC">State PSC</option>
+              <option value="SSC">SSC</option>
+              <option value="Banking">Banking</option>
+            </select>
+
+            <div class="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5" title="Aspirant Profile">
+              <div class="h-7 w-7 rounded-full bg-navy-900 text-white text-xs font-semibold flex items-center justify-center">
+                AR
+              </div>
+              <span class="text-xs font-medium text-slate-700">Amay Apurva</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Global SRS Compliance & Demo Banner -->
+      <div class="bg-amber-50/90 border-b border-amber-200 px-4 sm:px-6 py-2">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center rounded-md bg-amber-200/80 px-2 py-0.5 font-bold text-[11px] tracking-wide text-amber-950">DEMO DATA</span>
+            <span>Interactive prototype dataset for academic demonstration. All AI summaries &amp; syllabus tags require verification against original sources.</span>
+          </div>
+          <span class="text-[11px] font-medium text-amber-900">Not officially endorsed by UPSC or any exam body</span>
+        </div>
+      </div>
+
+      <!-- Main Dynamic Content Container -->
+      <main id="app-main" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <!-- Views are rendered dynamically via JS -->
+      </main>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. SAMPLE DATA REPOSITORY (SRS-COMPLIANT METADATA & AI SYNTHESIS)
+       ========================================================================= */
+    const TOPICS_DATA = [
+      {
+        id: "india-china",
+        title: "India–China Relations",
+        category: "INTERNATIONAL RELATIONS",
+        articleCount: 42,
+        updatedText: "Updated 2h ago",
+        exams: ["UPSC CSE", "State PSC", "SSC"],
+        syllabusTags: [
+          "GS-II • International Relations",
+          "GS-II • India & its Neighbourhood",
+          "GS-III • Border Security",
+          "GS-III • Economy & Trade",
+          "Essay • Strategic Autonomy"
+        ],
+        whyItMatters: "Recent border disengagement agreements test whether tactical stability along the Line of Actual Control (LAC) can coexist with persistent trade deficits and Indo-Pacific strategic competition.",
+        commonThemes: [
+          "Border security & LAC disengagement",
+          "Trade & economic interdependence",
+          "Strategic competition in the Indo-Pacific"
+        ],
+        keyDifferences: [
+          "Whether trade normalization can proceed independently of a settled boundary.",
+          "How much weight to give recent disengagement as a genuine strategic thaw.",
+          "Whether Quad alignment signals containment or autonomous balancing.",
+          "Pace at which electronics and solar manufacturing dependence should be reduced."
+        ],
+        perspectives: [
+          {
+            publisher: "The Hindu",
+            author: "Shivshankar Menon",
+            mainFocus: "Strategic Security",
+            keyArgument: "Disengagement is tactical, not a strategic reset; military preparedness along the LAC must continue.",
+            tone: "Critical"
+          },
+          {
+            publisher: "Indian Express",
+            author: "Ashok Malik",
+            mainFocus: "Economic Relations",
+            keyArgument: "Import dependence on China has grown despite tensions; supply chains need faster domestic diversification.",
+            tone: "Critical"
+          },
+          {
+            publisher: "Livemint",
+            author: "Nirupama Rao",
+            mainFocus: "Diplomatic Engagement",
+            keyArgument: "Quad coordination reflects a considered balancing act, not a fixed military alignment against Beijing.",
+            tone: "Analytical"
+          }
+        ],
+        balancedSynthesis: "Across the analysed articles, most sources agree that recent LAC disengagement has lowered immediate friction without resolving the underlying boundary dispute. Security-focused commentary favours continued military preparedness, while economy-focused commentary emphasises reducing critical import dependence. A more analytical strand frames India's Quad engagement as strategic balancing rather than rigid alignment.",
+        mainsOutline: {
+          intro: "Begin with the dual reality of India–China ties: cautious tactical disengagement along the LAC alongside deepening bilateral trade asymmetry.",
+          background: [
+            "Post-2020 Galwan friction altered India's diplomatic doctrine ('border peace is prerequisite for normalcy').",
+            "Bilateral trade crossed $118 billion with a widening deficit driven by electronics, APIs, and green-tech components."
+          ],
+          arguments: [
+            "Border stability reduces immediate escalation risks and frees diplomatic bandwidth.",
+            "Selective economic engagement (e.g., capital goods, FDI scrutiny under Press Note 3) can support domestic manufacturing if calibrated."
+          ],
+          challenges: [
+            "Lack of a mutually delineated LAC and infrastructure buildup in border areas.",
+            "Supply-chain vulnerability in solar cells, semiconductors, and pharmaceutical intermediates."
+          ],
+          initiatives: [
+            "Production Linked Incentive (PLI) schemes across 14 strategic sectors.",
+            "Vibrant Villages Programme and Border Roads Organisation (BRO) infrastructure push.",
+            "Quad and Indo-Pacific Maritime Domain Awareness partnerships."
+          ],
+          wayForward: [
+            "Maintain credible deterrence and verifiable patrolling protocols along the LAC.",
+            "Diversify critical mineral and electronics supply chains via friend-shoring.",
+            "Pursue issue-based multilateral diplomacy without compromising strategic autonomy."
+          ],
+          conclusion: "Conclude that durable stability requires converting tactical border calm into verifiable trust while building resilient domestic industrial capacity."
+        }
+      },
+      {
+        id: "semiconductor-mission",
+        title: "Semiconductor Mission",
+        category: "SCIENCE & TECHNOLOGY",
+        articleCount: 19,
+        updatedText: "Updated 5h ago",
+        exams: ["UPSC CSE", "State PSC", "Banking"],
+        syllabusTags: [
+          "GS-III • Science & Technology",
+          "GS-III • Industrial Policy & Infrastructure",
+          "GS-II • International Trade & Geopolitics"
+        ],
+        whyItMatters: "Semiconductors underpin digital sovereignty, defence electronics, and AI compute. India's $10B India Semiconductor Mission aims to move beyond chip design into fab and OSAT manufacturing.",
+        commonThemes: [
+          "Supply-chain resilience & geopolitical de-risking",
+          "Capital intensity and fiscal subsidy sustainability",
+          "Talent pipeline & design-to-fab ecosystem"
+        ],
+        keyDifferences: [
+          "Whether India should prioritize mature nodes (28nm+) over cutting-edge sub-7nm fabs.",
+          "Extent of fiscal risk borne by central and state governments through 50%+ capex subsidies.",
+          "Readiness of ultra-pure water, uninterrupted power, and specialty chemical ecosystems."
+        ],
+        perspectives: [
+          {
+            publisher: "Livemint",
+            author: "Pronab Sen",
+            mainFocus: "Fiscal & Industrial Economics",
+            keyArgument: "Mature-node fabs align better with domestic automotive and telecom demand than costly leading-edge fabs.",
+            tone: "Analytical"
+          },
+          {
+            publisher: "The Hindu",
+            author: "R. Ramachandran",
+            mainFocus: "R&D and Talent Ecosystem",
+            keyArgument: "Subsidies alone cannot build a chip ecosystem without deep-tech university R&D and chemical supply chains.",
+            tone: "Critical"
+          },
+          {
+            publisher: "Indian Express",
+            author: "C. Raja Mohan",
+            mainFocus: "Geopolitical Partnerships",
+            keyArgument: "India's integration into US-India iCET and global chip alliances creates a rare strategic window.",
+            tone: "Supportive"
+          }
+        ],
+        balancedSynthesis: "Analysts broadly welcome India's entry into semiconductor assembly (OSAT) and mature-node fabrication as vital for economic security. However, commentators caution that long-term competitiveness depends on ancillary chemical/water infrastructure, disciplined subsidy milestones, and leveraging India's strong VLSI design workforce.",
+        mainsOutline: {
+          intro: "Define semiconductors as the foundational 'new oil' of the digital economy and introduce the India Semiconductor Mission (ISM).",
+          background: [
+            "India accounts for ~20% of global chip design engineers but historically lacked commercial fabrication units.",
+            "Pandemic supply shocks and US–China tech decoupling highlighted import vulnerabilities."
+          ],
+          arguments: [
+            "Reduces import bill and strengthens national security in defence and telecom hardware.",
+            "Generates high-skill jobs and anchor clusters in Gujarat, Assam, and Karnataka."
+          ],
+          challenges: [
+            "High capital expenditure, rapid technological obsolescence, and water/power intensity.",
+            "Absence of domestic wafer, specialty gas, and photoresist suppliers."
+          ],
+          initiatives: [
+            "India Semiconductor Mission (ISM) with 50% fiscal support for fabs and ATMP/OSAT units.",
+            "Chips to Startup (C2S) programme and Design Linked Incentive (DLI) scheme."
+          ],
+          wayForward: [
+            "Focus on 28nm–65nm mature nodes serving EVs, power electronics, and IoT.",
+            "Co-locate chemical and gas vendors within semiconductor parks."
+          ],
+          conclusion: "A phased 'design-to-packaging-to-fab' roadmap backed by R&D will anchor India in trusted global value chains."
+        }
+      },
+      {
+        id: "one-nation-one-election",
+        title: "One Nation, One Election",
+        category: "POLITY & GOVERNANCE",
+        articleCount: 31,
+        updatedText: "Updated 1d ago",
+        exams: ["UPSC CSE", "State PSC"],
+        syllabusTags: [
+          "GS-II • Indian Constitution & Amendments",
+          "GS-II • Federalism & Representation of People Act",
+          "Essay • Democratic Governance"
+        ],
+        whyItMatters: "Synchronizing Lok Sabha and State Assembly elections raises fundamental constitutional questions around federal autonomy, tenure of legislatures, and administrative efficiency.",
+        commonThemes: [
+          "Governance continuity vs. frequent Model Code of Conduct pauses",
+          "Constitutional amendment thresholds and federal consent",
+          "Impact on regional parties and voter behaviour"
+        ],
+        keyDifferences: [
+          "Whether governance disruption from staggered polls justifies curtailing fixed five-year assembly tenures.",
+          "Whether simultaneous polls dilute local state-level accountability in favour of national narratives.",
+          "Feasibility of 'unexpired term' provisions when a government loses confidence mid-term."
+        ],
+        perspectives: [
+          {
+            publisher: "Indian Express",
+            author: "Pratap Bhanu Mehta",
+            mainFocus: "Constitutional Federalism",
+            keyArgument: "Shortening assembly terms to enforce synchronicity undermines the federal principle and voter mandate.",
+            tone: "Critical"
+          },
+          {
+            publisher: "Hindustan Times",
+            author: "Bibek Debroy",
+            mainFocus: "Administrative & Fiscal Efficiency",
+            keyArgument: "Continuous election cycles impose heavy security, logistical, and policy-paralysis costs on governance.",
+            tone: "Supportive"
+          },
+          {
+            publisher: "The Hindu",
+            author: "S.Y. Quraishi",
+            mainFocus: "Electoral Logistics & ECI Capacity",
+            keyArgument: "Simultaneous polls are logistically achievable with phased EVM procurement, provided broad political consensus is built.",
+            tone: "Analytical"
+          }
+        ],
+        balancedSynthesis: "While proponents highlight administrative savings and uninterrupted policy execution, constitutional scholars warn that mechanical synchronization could weaken federalism and regional voices. Electoral administrators emphasize that legal clarity on hung assemblies and bipartisan consensus are essential prerequisites.",
+        mainsOutline: {
+          intro: "Explain 'One Nation, One Election' (ONOE) as synchronizing Lok Sabha and State Assembly polls, noting India practiced it between 1951 and 1967.",
+          background: [
+            "Premature dissolutions of Assemblies and Lok Sabha since 1968 broke the simultaneous cycle.",
+            "Examined by Law Commission (170th Report), NITI Aayog, and the High-Level Committee chaired by Ram Nath Kovind."
+          ],
+          arguments: [
+            "Reduces repeated deployment of security forces and civil servants.",
+            "Minimizes policy paralysis caused by frequent Model Code of Conduct (MCC) enforcement."
+          ],
+          challenges: [
+            "Requires amending Articles 83, 85, 172, 174, and 356, impacting federal structure.",
+            "Concerns that national issues may overshadow state-specific governance accountability."
+          ],
+          initiatives: [
+            "High-Level Committee recommendations proposing two-phase synchronization and common electoral rolls.",
+            "Election Commission expansion of EVM/VVPAT manufacturing capacity."
+          ],
+          wayForward: [
+            "Adopt constructive vote of no-confidence to prevent frequent mid-term dissolutions.",
+            "Build wide cross-party and state-level consensus before constitutional amendments."
+          ],
+          conclusion: "Electoral reforms must balance administrative efficiency with India's foundational commitment to parliamentary federalism."
+        }
+      },
+      {
+        id: "climate-economy",
+        title: "Climate Change & India's Economy",
+        category: "ENVIRONMENT",
+        articleCount: 27,
+        updatedText: "Updated 3h ago",
+        exams: ["UPSC CSE", "State PSC", "Banking", "SSC"],
+        syllabusTags: [
+          "GS-III • Environment & Climate Change",
+          "GS-III • Sustainable Growth & Energy Transition",
+          "GS-I • Impact of Climate on Agriculture & Society"
+        ],
+        whyItMatters: "Heatwaves, erratic monsoons, and global carbon border taxes directly affect India's agricultural productivity, inflation, and export competitiveness.",
+        commonThemes: [
+          "Climate adaptation financing for agriculture and urban infrastructure",
+          "Balancing coal-backed energy security with 500 GW renewable targets",
+          "Impact of EU CBAM on Indian steel and aluminium exports"
+        ],
+        keyDifferences: [
+          "Speed of coal phase-down versus baseload grid reliability.",
+          "Role of domestic green taxonomy and sovereign green bonds vs. international climate finance.",
+          "How to protect informal outdoor workers from extreme heat stress."
+        ],
+        perspectives: [
+          {
+            publisher: "The Hindu",
+            author: "T. Jayaraman",
+            mainFocus: "Climate Equity & CBDR",
+            keyArgument: "Developed nations must fulfill climate finance commitments before imposing unilateral carbon tariffs on developing economies.",
+            tone: "Critical"
+          },
+          {
+            publisher: "Livemint",
+            author: "Ajay Shah",
+            mainFocus: "Market Instruments & Adaptation",
+            keyArgument: "Local municipal capacity, heat-resilient urban planning, and carbon markets matter more than top-down mandates.",
+            tone: "Analytical"
+          },
+          {
+            publisher: "Indian Express",
+            author: "Arunabha Ghosh",
+            mainFocus: "Clean Tech Industrial Strategy",
+            keyArgument: "Green hydrogen, grid-scale battery storage, and decentralized solar can turn transition into a growth engine.",
+            tone: "Supportive"
+          }
+        ],
+        balancedSynthesis: "Commentators converge on the urgency of climate adaptation to safeguard India's GDP and rural livelihoods from extreme weather. Differences center on transition pacing—balancing immediate energy affordability with green industrial competitiveness and equitable global climate finance.",
+        mainsOutline: {
+          intro: "Highlight climate change as a macroeconomic and developmental risk—not merely an environmental issue—for a fast-growing economy like India.",
+          background: [
+            "RBI and Economic Survey assessments warn of heat-induced labour productivity losses and food inflation spikes.",
+            "India's Panchamrit targets commit to 500 GW non-fossil capacity by 2030 and Net Zero by 2070."
+          ],
+          arguments: [
+            "Clean energy transition lowers long-term fossil import bills and attracts green capital.",
+            "Climate-resilient agriculture stabilizes rural incomes and inflation."
+          ],
+          challenges: [
+            "High cost of capital for battery storage and grid modernization.",
+            "Trade barriers like the EU Carbon Border Adjustment Mechanism (CBAM) affecting MSMEs."
+          ],
+          initiatives: [
+            "National Green Hydrogen Mission, PM-KUSUM, and Sovereign Green Bonds.",
+            "Coalition for Disaster Resilient Infrastructure (CDRI) and Heat Action Plans."
+          ],
+          wayForward: [
+            "Operationalize the Indian Carbon Market (ICM) and expand climate-resilient seed varieties.",
+            "Integrate heat-stress protection into urban employment and housing schemes."
+          ],
+          conclusion: "A people-centric, adaptation-first growth model ensures climate resilience reinforces India's developmental aspirations."
+        }
+      }
+    ];
+
+    const ARTICLES_DATA = [
+      {
+        id: 101,
+        topicId: "india-china",
+        title: "The Future of India–China Relations After Depsang",
+        author: "Shivshankar Menon",
+        publisher: "The Hindu",
+        publishedDate: "2026-09-12",
+        displayDate: "12 Sept 2026",
+        type: "Editorial",
+        examRelevance: ["GS Paper II", "Essay"],
+        url: "https://www.thehindu.com/opinion/editorial/",
+        perspective: "Critical",
+        aiSummary: "The editorial argues that the Depsang disengagement is a tactical thaw rather than a strategic reset, and that trade dependence continues to complicate India's security posture toward Beijing. It calls for calibrated engagement alongside continued military preparedness along the LAC.",
+        keyPoints: [
+          "Patrolling agreements lower immediate flashpoint risk but leave boundary delimitation unresolved.",
+          "Growing bilateral trade asymmetry limits India's economic leverage during diplomatic standoffs.",
+          "Sustained border infrastructure and diplomatic realism must anchor New Delhi's posture."
+        ],
+        concepts: ["Geopolitics", "Border Security", "Trade", "Diplomacy"]
+      },
+      {
+        id: 102,
+        topicId: "india-china",
+        title: "Why Economic Interdependence Won't Solve the Border Problem",
+        author: "Ashok Malik",
+        publisher: "Indian Express",
+        publishedDate: "2026-09-11",
+        displayDate: "11 Sept 2026",
+        type: "Opinion",
+        examRelevance: ["GS Paper II", "GS Paper III"],
+        url: "https://indianexpress.com/section/opinion/",
+        perspective: "Critical",
+        aiSummary: "The author is critical of framing trade normalization as a substitute for a settled boundary, arguing India's electronics and solar-manufacturing dependence on Chinese imports has grown even as border tensions persist, and urges faster supply-chain diversification.",
+        keyPoints: [
+          "Historical assumption that trade dampens geopolitical rivalry has not held along the LAC.",
+          "Critical upstream inputs in electronics and clean energy remain heavily concentrated.",
+          "Domestic PLI execution and trusted-partner sourcing require accelerated timelines."
+        ],
+        concepts: ["Trade Imbalance", "Manufacturing", "Strategic Autonomy"]
+      },
+      {
+        id: 103,
+        topicId: "india-china",
+        title: "Reading the Quad Through a China Lens",
+        author: "Nirupama Rao",
+        publisher: "Livemint",
+        publishedDate: "2026-09-09",
+        displayDate: "9 Sept 2026",
+        type: "Analysis",
+        examRelevance: ["GS Paper II"],
+        url: "https://www.livemint.com/opinion",
+        perspective: "Analytical",
+        aiSummary: "A largely neutral, analytical piece mapping how Quad coordination has shifted toward public-goods delivery—such as maritime domain awareness and digital infrastructure—signalling strategic balancing rather than rigid alliance alignment in the Indo-Pacific.",
+        keyPoints: [
+          "Quad agenda prioritizes non-military public goods to reassure ASEAN and Global South partners.",
+          "India retains multi-alignment flexibility across BRICS, SCO, and Indo-Pacific groupings.",
+          "Maritime security cooperation complements continental border deterrence."
+        ],
+        concepts: ["Quad", "Indo-Pacific", "Multilateral Groupings"]
+      },
+      {
+        id: 104,
+        topicId: "semiconductor-mission",
+        title: "Building Chips at Home: Beyond Capex Subsidies",
+        author: "Pronab Sen",
+        publisher: "Livemint",
+        publishedDate: "2026-09-10",
+        displayDate: "10 Sept 2026",
+        type: "Analysis",
+        examRelevance: ["GS Paper III"],
+        url: "https://www.livemint.com/opinion",
+        perspective: "Analytical",
+        aiSummary: "Examines the economics of India's semiconductor fabrication push, noting that targeting mature 28nm–65nm nodes matches domestic automotive and telecom demand while warning that reliable power, ultra-pure water, and chemical ecosystems determine long-term viability.",
+        keyPoints: [
+          "Mature nodes carry lower technological obsolescence risk than sub-5nm leading-edge fabs.",
+          "OSAT and packaging units offer faster job creation and ecosystem learning.",
+          "State-level utility reliability is as decisive as central fiscal incentives."
+        ],
+        concepts: ["Semiconductors", "Industrial Policy", "Supply Chains"]
+      },
+      {
+        id: 105,
+        topicId: "one-nation-one-election",
+        title: "The Federal Cost of Synchronized Polls",
+        author: "Pratap Bhanu Mehta",
+        publisher: "Indian Express",
+        publishedDate: "2026-09-08",
+        displayDate: "8 Sept 2026",
+        type: "Editorial",
+        examRelevance: ["GS Paper II", "Essay"],
+        url: "https://indianexpress.com/section/opinion/editorials/",
+        perspective: "Critical",
+        aiSummary: "Argues that synchronizing Lok Sabha and State Assembly elections by curtailing existing legislative terms weakens parliamentary accountability and risks subordinating regional governance issues to national campaigns.",
+        keyPoints: [
+          "Frequent elections act as an ongoing democratic feedback mechanism in a diverse federation.",
+          "Artificially shortening assembly tenures alters the mandate given by state voters.",
+          "Administrative convenience should not override constitutional federalism."
+        ],
+        concepts: ["Federalism", "Electoral Reforms", "Constitutionalism"]
+      },
+      {
+        id: 106,
+        topicId: "climate-economy",
+        title: "Heat, Monsoons and Macroeconomic Stability",
+        author: "Arunabha Ghosh",
+        publisher: "The Hindu",
+        publishedDate: "2026-09-07",
+        displayDate: "7 Sept 2026",
+        type: "Explainer",
+        examRelevance: ["GS Paper III", "Essay"],
+        url: "https://www.thehindu.com/opinion/",
+        perspective: "Supportive",
+        aiSummary: "Explains how extreme heatwaves and erratic rainfall directly transmit into food inflation, rural demand, and fiscal outlays, advocating decentralized solar, heat-resilient agriculture, and municipal adaptation budgets.",
+        keyPoints: [
+          "Climate shocks increasingly drive headline CPI volatility through perishable food prices.",
+          "Decentralized renewable energy shields MSMEs and farmers from grid disruptions.",
+          "Adaptation financing must be mainstreamed into state and municipal budgets."
+        ],
+        concepts: ["Climate Adaptation", "Food Inflation", "Green Transition"]
+      }
+    ];
+
+    const PRACTICE_QUESTIONS = [
+      {
+        id: "mcq-1",
+        topic: "India–China Relations & Indo-Pacific",
+        examTag: "UPSC Prelims • GS-I / IR",
+        question: "With reference to the Quadrilateral Security Dialogue (Quad) and Indo-Pacific maritime governance, consider the following statements:\n1. The Indo-Pacific Partnership for Maritime Domain Awareness (IPMDA) aims to provide near-real-time maritime tracking data to regional partners.\n2. The Quad operates under a binding mutual-defence treaty clause modeled on NATO's Article 5.\nWhich of the statements given above is/are correct?",
+        options: [
+          "1 only",
+          "2 only",
+          "Both 1 and 2",
+          "Neither 1 nor 2"
+        ],
+        correctIndex: 0,
+        explanation: "Statement 1 is correct: IPMDA was launched to enhance maritime domain awareness across the Pacific Islands, Southeast Asia, and the Indian Ocean Region. Statement 2 is incorrect: The Quad is an informal strategic forum with no collective-defence treaty obligation.",
+        sourceRef: "Based on 'Reading the Quad Through a China Lens' (Livemint)"
+      },
+      {
+        id: "mcq-2",
+        topic: "India Semiconductor Mission",
+        examTag: "UPSC Prelims • Economy & S&T",
+        question: "In the context of semiconductor manufacturing, what does 'OSAT' stand for?",
+        options: [
+          "Optical Silicon Architecture Technology",
+          "Outsourced Semiconductor Assembly and Test",
+          "Open-Source Analog Transistor",
+          "Operational System for Automated Testing"
+        ],
+        correctIndex: 1,
+        explanation: "OSAT stands for Outsourced Semiconductor Assembly and Test—facilities that package, assemble, and test fabricated silicon wafers into finished chips before integration into electronic devices.",
+        sourceRef: "Based on 'Building Chips at Home: Beyond Capex Subsidies' (Livemint)"
+      },
+      {
+        id: "mcq-3",
+        topic: "Climate Change & Economy",
+        examTag: "UPSC Prelims • Environment & Economy",
+        question: "Which of the following instruments is specifically designed by the European Union to prevent 'carbon leakage' by pricing emissions embedded in imported goods such as steel and aluminium?",
+        options: [
+          "Clean Development Mechanism (CDM)",
+          "Carbon Border Adjustment Mechanism (CBAM)",
+          "Global Methane Pledge",
+          "Loss and Damage Fund"
+        ],
+        correctIndex: 1,
+        explanation: "The EU Carbon Border Adjustment Mechanism (CBAM) puts a carbon price on imports of carbon-intensive goods into the EU to align with domestic EU Emissions Trading System standards.",
+        sourceRef: "Based on 'Heat, Monsoons and Macroeconomic Stability' (The Hindu)"
+      }
+    ];
+
+    /* =========================================================================
+       2. APPLICATION STATE (PERSISTED IN LOCALSTORAGE)
+       ========================================================================= */
+    const STORAGE_KEY = "preplens_prototype_state_v1";
+
+    const defaultState = {
+      activeRoute: "dashboard",
+      selectedExam: "UPSC CSE",
+      searchQuery: "",
+      filterType: "All",
+      filterPublisher: "All",
+      filterExam: "All",
+      sortBy: "relevance",
+      selectedCompareTopicId: "india-china",
+      bookmarkedArticleIds: [101],
+      savedTopicIds: ["india-china", "climate-economy"],
+      articlesReadCount: 142,
+      questionsPracticedCount: 76,
+      answeredMcqs: {},
+      notes: [
+        {
+          id: "note-1",
+          title: "India–China LAC & Trade Asymmetry (GS-II)",
+          topic: "India–China Relations",
+          gsPaper: "GS-II",
+          marks: 15,
+          createdAt: "12 Sept 2026",
+          content: "Introduction: Tactical disengagement at Depsang lowers immediate flashpoint risks without resolving boundary delimitation.\nKey Arguments: Maintain credible LAC deterrence; accelerate PLI in electronics & solar cells to reduce critical import dependence."
+        }
+      ],
+      selectedNoteTopicId: "india-china",
+      selectedMarks: 15,
+      selectedGsPaper: "GS-II"
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { ...defaultState };
+        return { ...defaultState, ...JSON.parse(raw) };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // Ignore storage quota errors in restricted sandboxes
+      }
+      updateSidebarCounters();
+    }
+
+    /* =========================================================================
+       3. UI HELPERS (TOASTS, NAVIGATION, AI DISCLAIMER BADGE)
+       ========================================================================= */
+    function showToast(message) {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = "rounded-xl bg-navy-900 text-white px-4 py-3 text-xs font-medium shadow-lg border border-slate-700 transition-opacity duration-200";
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.classList.add("opacity-0");
+        setTimeout(() => el.remove(), 220);
+      }, 2600);
+    }
+
+    function aiDisclaimerBanner(customText) {
+      const text = customText || "AI-generated summary — verify important facts with the original source.";
+      return `
+        <div role="note" class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/80 px-2.5 py-1 text-[11px] font-medium text-navy-900">
+          <span class="h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0"></span>
+          <span>${text}</span>
+        </div>
+      `;
+    }
+
+    function perspectiveBadge(tone) {
+      const map = {
+        Critical: "bg-rose-50 text-rose-800 border-rose-200",
+        Analytical: "bg-emerald-50 text-emerald-800 border-emerald-200",
+        Supportive: "bg-blue-50 text-blue-800 border-blue-200",
+        Neutral: "bg-slate-100 text-slate-700 border-slate-200"
+      };
+      const cls = map[tone] || map.Neutral;
+      return `<span title="AI-generated perspective interpretation" class="inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${cls}">${tone} (AI)</span>`;
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById("sidebar");
+      const backdrop = document.getElementById("mobile-backdrop");
+      if (open) {
+        sidebar.classList.remove("-translate-x-full");
+        backdrop.classList.remove("hidden");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        backdrop.classList.add("hidden");
+      }
+    }
+
+    function updateSidebarCounters() {
+      const bmEl = document.getElementById("sidebar-bookmark-count");
+      const notesEl = document.getElementById("sidebar-notes-count");
+      if (bmEl) bmEl.textContent = state.bookmarkedArticleIds.length;
+      if (notesEl) notesEl.textContent = state.notes.length;
+    }
+
+    function navigate(route, opts = {}) {
+      state.activeRoute = route;
+      if (opts.topicId) {
+        state.selectedCompareTopicId = opts.topicId;
+        state.selectedNoteTopicId = opts.topicId;
+      }
+      if (typeof opts.query === "string") {
+        state.searchQuery = opts.query;
+        const input = document.getElementById("global-search-input");
+        if (input) input.value = opts.query;
+      }
+      saveState();
+      toggleSidebar(false);
+      render();
+    }
+
+    function handleGlobalSearch(e) {
+      e.preventDefault();
+      const val = document.getElementById("global-search-input").value;
+      navigate("search", { query: val });
+    }
+
+    function handleExamChange(exam) {
+      state.selectedExam = exam;
+      saveState();
+      showToast(`Target exam switched to ${exam}`);
+      render();
+    }
+
+    /* =========================================================================
+       4. ACTIONS (BOOKMARKS, READ TRACKING, NOTES, MCQs)
+       ========================================================================= */
+    function toggleBookmark(articleId) {
+      const idx = state.bookmarkedArticleIds.indexOf(articleId);
+      if (idx === -1) {
+        state.bookmarkedArticleIds.push(articleId);
+        showToast("Article saved to Bookmarks");
+      } else {
+        state.bookmarkedArticleIds.splice(idx, 1);
+        showToast("Removed from Bookmarks");
+      }
+      saveState();
+      render();
+    }
+
+    function recordOriginalRead(publisher) {
+      state.articlesReadCount += 1;
+      saveState();
+      showToast(`Opening original article at ${publisher} (+1 Articles Read)`);
+    }
+
+    function selectMcqOption(mcqId, optionIdx) {
+      if (state.answeredMcqs[mcqId] !== undefined) return;
+      state.answeredMcqs[mcqId] = optionIdx;
+      state.questionsPracticedCount += 1;
+      saveState();
+      render();
+    }
+
+    function resetMcq(mcqId) {
+      delete state.answeredMcqs[mcqId];
+      saveState();
+      render();
+    }
+
+    function saveGeneratedOutlineAsNote() {
+      const topic = TOPICS_DATA.find((t) => t.id === state.selectedNoteTopicId) || TOPICS_DATA[0];
+      const o = topic.mainsOutline;
+      const formatted = [
+        `Introduction: ${o.intro}`,
+        `\nBackground:\n• ${o.background.join("\n• ")}`,
+        `\nMain Arguments:\n• ${o.arguments.join("\n• ")}`,
+        `\nChallenges:\n• ${o.challenges.join("\n• ")}`,
+        `\nGovernment Initiatives:\n• ${o.initiatives.join("\n• ")}`,
+        `\nWay Forward:\n• ${o.wayForward.join("\n• ")}`,
+        `\nConclusion: ${o.conclusion}`
+      ].join("\n");
+
+      state.notes.unshift({
+        id: "note-" + Date.now(),
+        title: `${topic.title} — ${state.selectedMarks}M Structure (${state.selectedGsPaper})`,
+        topic: topic.title,
+        gsPaper: state.selectedGsPaper,
+        marks: state.selectedMarks,
+        createdAt: "Today",
+        content: formatted
+      });
+      saveState();
+      showToast("Mains structure saved to Personal Notes");
+      render();
+    }
+
+    function addCustomNote(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById("custom-note-title");
+      const bodyInput = document.getElementById("custom-note-body");
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      if (!title || !body) return;
+
+      state.notes.unshift({
+        id: "note-" + Date.now(),
+        title,
+        topic: "Personal Revision",
+        gsPaper: state.selectedGsPaper,
+        marks: state.selectedMarks,
+        createdAt: "Just now",
+        content: body
+      });
+      titleInput.value = "";
+      bodyInput.value = "";
+      saveState();
+      showToast("Personal note saved");
+      render();
+    }
+
+    function deleteNote(noteId) {
+      state.notes = state.notes.filter((n) => n.id !== noteId);
+      saveState();
+      showToast("Note deleted");
+      render();
+    }
+
+    /* =========================================================================
+       5. VIEW RENDERERS
+       ========================================================================= */
+    function renderDashboardView() {
+      const quickTopics = ["Climate Change", "India-China Relations", "Semiconductor Mission", "One Nation, One Election"];
+      const trending = TOPICS_DATA;
+
+      return `
+        <!-- Greeting & Quick Query Chips -->
+        <section class="space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Good evening, Ananya</h1>
+            <span class="text-xs font-medium text-slate-500">Focused on <strong class="text-navy-900">${state.selectedExam}</strong></span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            <span>Try:</span>
+            ${quickTopics.map(t => `
+              <button type="button" onclick="navigate('search', { query: '${t}' })" class="rounded-full bg-white border border-slate-200 px-3 py-1 font-medium text-navy-900 hover:border-navy-700 hover:bg-blue-50/50 transition">
+                ${t}
+              </button>
+            `).join("")}
+          </div>
+        </section>
+
+        <!-- Usage Statistics Cards (REQ-4.11.1) -->
+        <section aria-label="Study Statistics" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+            <p class="text-3xl font-bold text-navy-900">${state.articlesReadCount}</p>
+            <p class="text-xs font-medium text-slate-500 mt-1">Articles Read</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+            <p class="text-3xl font-bold text-navy-900">${state.savedTopicIds.length + 26}</p>
+            <p class="text-xs font-medium text-slate-500 mt-1">Topics Saved</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+            <p class="text-3xl font-bold text-navy-900">${state.notes.length}</p>
+            <p class="text-xs font-medium text-slate-500 mt-1">Notes Created</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+            <p class="text-3xl font-bold text-navy-900">${state.questionsPracticedCount}</p>
+            <p class="text-xs font-medium text-slate-500 mt-1">Questions Practiced</p>
+          </div>
+        </section>
+
+        <!-- Trending Topics Grid (REQ-4.11.2) -->
+        <section aria-labelledby="trending-heading" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 id="trending-heading" class="text-lg font-bold text-slate-900">Trending Topics</h2>
+            <button type="button" onclick="navigate('search', { query: '' })" class="text-xs font-semibold text-navy-900 hover:underline">
+              View all editorials &rarr;
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            ${trending.map(topic => `
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between gap-4 hover:border-navy-700/40 transition">
+                <div class="space-y-1.5">
+                  <p class="text-[11px] font-bold tracking-wider text-slate-500 uppercase">${topic.category}</p>
+                  <h3 class="text-base font-bold text-slate-900 leading-snug">${topic.title}</h3>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between text-xs text-slate-500">
+                    <span>${topic.articleCount} articles</span>
+                    <span>${topic.updatedText}</span>
+                  </div>
+                  <div class="flex gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="navigate('search', { query: '${topic.title}' })" class="flex-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-200">
+                      Articles
+                    </button>
+                    <button type="button" onclick="navigate('compare', { topicId: '${topic.id}' })" class="flex-1 rounded-lg bg-navy-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-navy-800">
+                      Compare
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+
+        <!-- Bottom Two-Column Section: Recommended for You + Today's Editorial Digest -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Recommended for You -->
+          <section aria-labelledby="rec-heading" class="lg:col-span-2 space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 id="rec-heading" class="text-lg font-bold text-slate-900">Recommended for You</h2>
+              <span class="text-xs text-slate-500">Based on ${state.selectedExam} &amp; saved topics</span>
+            </div>
+
+            <div class="space-y-3">
+              ${[
+                { title: "The Future of India–China Relations After Depsang", reason: "Matches your saved topic: India–China Relations", query: "India-China" },
+                { title: "Building Chips at Home: Beyond Capex Subsidies", reason: "High relevance for GS-III Science & Technology", query: "Semiconductor" },
+                { title: "The Federal Cost of Synchronized Polls", reason: "Trending among UPSC CSE polity aspirants", query: "One Nation" },
+                { title: "Heat, Monsoons and Macroeconomic Stability", reason: "Continues your reading history in Environment", query: "Climate" }
+              ].map(item => `
+                <button type="button" onclick="navigate('search', { query: '${item.query}' })" class="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-navy-700/50 transition flex items-center justify-between gap-4">
+                  <div>
+                    <p class="text-sm font-semibold text-slate-900">${item.title}</p>
+                    <p class="text-xs text-slate-500 mt-0.5">${item.reason}</p>
+                  </div>
+                  <span class="text-slate-400 text-sm shrink-0">&rarr;</span>
+                </button>
+              `).join("")}
+            </div>
+          </section>
+
+          <!-- Today's Editorial Digest Card -->
+          <aside aria-labelledby="digest-card-heading" class="rounded-2xl bg-navy-900 text-white p-6 flex flex-col justify-between gap-6 shadow-sm">
+            <div class="space-y-4">
+              <div>
+                <h2 id="digest-card-heading" class="text-lg font-bold text-white">Today's Editorial Digest</h2>
+                <p class="text-xs text-slate-300 mt-0.5">4 key issues &bull; Updated 6:00 AM</p>
+              </div>
+
+              <div class="divide-y divide-slate-800">
+                ${TOPICS_DATA.slice(0, 3).map(t => `
+                  <div class="py-3 first:pt-1">
+                    <p class="text-sm font-semibold text-white">${t.title}</p>
+                    <p class="text-xs text-slate-300 mt-0.5">${t.perspectives.length} viewpoints &bull; ${t.syllabusTags[0]}</p>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+
+            <button type="button" onclick="navigate('digest')" class="w-full rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-bold text-navy-900 hover:bg-amber-300 transition shadow-xs">
+              Open Full Digest
+            </button>
+          </aside>
+        </div>
+      `;
+    }
+
+    function renderSearchView() {
+      const q = state.searchQuery.trim().toLowerCase();
+      let filtered = ARTICLES_DATA.filter((a) => {
+        const matchesQuery =
+          !q ||
+          a.title.toLowerCase().includes(q) ||
+          a.aiSummary.toLowerCase().includes(q) ||
+          a.publisher.toLowerCase().includes(q) ||
+          (a.author && a.author.toLowerCase().includes(q)) ||
+          a.concepts.some((c) => c.toLowerCase().includes(q));
+
+        const matchesType = state.filterType === "All" || a.type === state.filterType;
+        const matchesPublisher = state.filterPublisher === "All" || a.publisher === state.filterPublisher;
+        const matchesExam = state.filterExam === "All" || a.examRelevance.includes(state.filterExam);
+
+        return matchesQuery && matchesType && matchesPublisher && matchesExam;
+      });
+
+      if (state.sortBy === "newest") {
+        filtered = [...filtered].sort((a, b) => b.publishedDate.localeCompare(a.publishedDate));
+      } else if (state.sortBy === "oldest") {
+        filtered = [...filtered].sort((a, b) => a.publishedDate.localeCompare(b.publishedDate));
+      }
+
+      const types = ["All", "Editorial", "Opinion", "Analysis", "Explainer"];
+      const publishers = ["All", "The Hindu", "Indian Express", "Livemint"];
+      const examFilters = ["All", "GS Paper II", "GS Paper III", "Essay"];
+
+      return `
+        <section class="space-y-5">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">
+                ${state.searchQuery.trim() ? `Results for "${state.searchQuery.trim()}"` : "Aggregated Editorials & Opinions"}
+              </h1>
+              <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+                Showing ${filtered.length} deduplicated article(s) from permitted feeds
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-500 font-medium">Sort:</span>
+              ${[
+                { id: "relevance", label: "Relevance" },
+                { id: "newest", label: "Newest" },
+                { id: "oldest", label: "Oldest" }
+              ].map(s => `
+                <button type="button" onclick="state.sortBy='${s.id}'; saveState(); render();" class="px-2.5 py-1 rounded-lg font-medium ${state.sortBy === s.id ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"}">
+                  ${s.label}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+
+          <!-- Type Quick Tabs -->
+          <div class="flex flex-wrap items-center gap-2">
+            ${types.map(t => `
+              <button type="button" onclick="state.filterType='${t}'; saveState(); render();" class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${state.filterType === t ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"}">
+                ${t === "All" ? "All Types" : t}
+              </button>
+            `).join("")}
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            <!-- Filter Sidebar -->
+            <aside class="rounded-2xl border border-slate-200 bg-white p-4 space-y-5 shadow-2xs">
+              <div class="space-y-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Source / Publisher</p>
+                <div class="space-y-1.5">
+                  ${publishers.map(pub => `
+                    <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                      <input type="radio" name="pub-filter" ${state.filterPublisher === pub ? "checked" : ""} onchange="state.filterPublisher='${pub}'; saveState(); render();" class="accent-navy-900" />
+                      <span>${pub}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-3 border-t border-slate-100">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Exam Relevance</p>
+                <div class="space-y-1.5">
+                  ${examFilters.map(ex => `
+                    <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                      <input type="radio" name="exam-filter" ${state.filterExam === ex ? "checked" : ""} onchange="state.filterExam='${ex}'; saveState(); render();" class="accent-navy-900" />
+                      <span>${ex}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              </div>
+
+              <button type="button" onclick="state.searchQuery=''; state.filterType='All'; state.filterPublisher='All'; state.filterExam='All'; document.getElementById('global-search-input').value=''; saveState(); render();" class="w-full rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                Reset All Filters
+              </button>
+            </aside>
+
+            <!-- Results List -->
+            <div class="lg:col-span-3 space-y-4">
+              ${filtered.length === 0 ? `
+                <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center space-y-2">
+                  <p class="text-base font-bold text-slate-900">No matching articles found</p>
+                  <p class="text-xs text-slate-500">Try searching a broader topic (e.g., "India", "Climate", "Chip") or clearing filters.</p>
+                </div>
+              ` : filtered.map(article => renderArticleCard(article)).join("")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderArticleCard(article) {
+      const isSaved = state.bookmarkedArticleIds.includes(article.id);
+      return `
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xs space-y-3.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[11px] font-bold uppercase text-emerald-800">
+                ${article.type}
+              </span>
+              <span class="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-900">
+                DEMO DATA
+              </span>
+              ${perspectiveBadge(article.perspective)}
+            </div>
+            <span class="text-xs text-slate-500">${article.displayDate}</span>
+          </div>
+
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 leading-snug">${article.title}</h2>
+            <p class="text-xs text-slate-600 mt-1">
+              By <strong class="font-semibold text-slate-800">${article.author}</strong> &bull;
+              <strong class="font-semibold text-navy-900">${article.publisher}</strong>
+            </p>
+          </div>
+
+          <!-- AI Summary Block with mandatory disclaimer -->
+          <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">AI Summary</span>
+              ${aiDisclaimerBanner()}
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed">${article.aiSummary}</p>
+          </div>
+
+          <!-- Concepts & Action Row -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
+              ${article.concepts.map(c => `<span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-medium text-slate-700">${c}</span>`).join("")}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <a
+                href="${article.url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="recordOriginalRead('${article.publisher}')"
+                class="inline-flex items-center gap-1.5 rounded-xl bg-navy-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-800 transition"
+              >
+                <span>Read Original Article</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+
+              <button
+                type="button"
+                onclick="toggleBookmark(${article.id})"
+                class="rounded-xl border px-3 py-2 text-xs font-semibold transition ${isSaved ? "border-amber-300 bg-amber-50 text-amber-900" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}"
+              >
+                ${isSaved ? "Saved" : "Save"}
+              </button>
+
+              <button
+                type="button"
+                onclick="navigate('compare', { topicId: '${article.topicId}' })"
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Compare
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderCompareView() {
+      const topic = TOPICS_DATA.find((t) => t.id === state.selectedCompareTopicId) || TOPICS_DATA[0];
+
+      return `
+        <section class="space-y-6">
+          <!-- Topic Header & Selector -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Compare Viewpoints &mdash; ${topic.title}</h1>
+              <p class="text-xs sm:text-sm text-slate-600 mt-0.5">${topic.articleCount} articles analysed across permitted publications</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label for="compare-topic-select" class="text-xs font-semibold text-slate-600">Select Topic:</label>
+              <select
+                id="compare-topic-select"
+                onchange="state.selectedCompareTopicId=this.value; saveState(); render();"
+                class="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-navy-900"
+              >
+                ${TOPICS_DATA.map(t => `<option value="${t.id}" ${t.id === topic.id ? "selected" : ""}>${t.title}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+
+          <!-- Common Themes (REQ-4.4.1) -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Common Themes</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              ${topic.commonThemes.map(theme => `
+                <div class="rounded-xl bg-emerald-50/80 border border-emerald-200 px-4 py-3 text-xs sm:text-sm font-medium text-emerald-950">
+                  ${theme}
+                </div>
+              `).join("")}
+            </div>
+          </div>
+
+          <!-- Per-Publication Perspective Cards (REQ-4.4.3) -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Perspective Comparison</p>
+              ${aiDisclaimerBanner("AI perspective classification — analytical interpretation, not objective fact.")}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              ${topic.perspectives.map(p => `
+                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between gap-4">
+                  <div class="space-y-3">
+                    <div>
+                      <h2 class="text-base font-bold text-slate-900">${p.publisher}</h2>
+                      <p class="text-xs text-slate-500">${p.author}</p>
+                    </div>
+                    <div>
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Main Focus</p>
+                      <p class="text-xs font-semibold text-slate-800 mt-0.5">${p.mainFocus}</p>
+                    </div>
+                    <div>
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Key Argument</p>
+                      <p class="text-xs text-slate-700 leading-relaxed mt-0.5">${p.keyArgument}</p>
+                    </div>
+                  </div>
+                  <div>
+                    ${perspectiveBadge(p.tone)}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+
+          <!-- Key Differences (REQ-4.4.2) -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Key Differences</p>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-700">
+              ${topic.keyDifferences.map(diff => `
+                <li class="flex items-start gap-2.5">
+                  <span class="h-1.5 w-1.5 rounded-full bg-rose-600 mt-2 shrink-0"></span>
+                  <span>${diff}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </div>
+
+          <!-- Balanced Synthesis (REQ-4.4.4) -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-navy-900">
+                AI-Generated &bull; Verify Against Original Sources
+              </span>
+              <button type="button" onclick="navigate('notes', { topicId: '${topic.id}' })" class="text-xs font-semibold text-navy-900 hover:underline">
+                Generate Mains Answer Structure &rarr;
+              </button>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Balanced Synthesis</p>
+            <p class="text-sm text-slate-800 leading-relaxed">${topic.balancedSynthesis}</p>
+          </div>
+
+          <!-- Exam & Syllabus Relevance (REQ-4.6) -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Exam &amp; Syllabus Relevance</p>
+              <span class="text-[11px] text-slate-500">AI-assisted mapping (not officially endorsed by UPSC)</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${topic.syllabusTags.map(tag => `
+                <span class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-950">
+                  ${tag}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDigestView() {
+      return `
+        <section class="space-y-6">
+          <div class="rounded-2xl bg-navy-900 text-white p-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-300">Daily Editorial Briefing</span>
+              <h1 class="text-2xl font-bold mt-1">Today's Exam-Ready Editorial Digest</h1>
+              <p class="text-xs text-slate-300 mt-1">Curated synthesis of major issues, differing viewpoints, and syllabus links.</p>
+            </div>
+            ${aiDisclaimerBanner("AI-synthesized digest — verify facts via original publisher links.")}
+          </div>
+
+          <div class="space-y-4">
+            ${TOPICS_DATA.map((t, idx) => `
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="h-6 w-6 rounded-full bg-navy-900 text-white text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">${t.category}</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${t.syllabusTags.slice(0, 2).map(tag => `<span class="rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[11px] font-semibold text-amber-900">${tag}</span>`).join("")}
+                  </div>
+                </div>
+
+                <div>
+                  <h2 class="text-lg font-bold text-slate-900">${t.title}</h2>
+                  <p class="text-xs font-semibold text-navy-800 mt-1">Why It Matters Today:</p>
+                  <p class="text-sm text-slate-700 leading-relaxed mt-0.5">${t.whyItMatters}</p>
+                </div>
+
+                <div class="rounded-xl bg-slate-50 p-4 space-y-2">
+                  <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Key Takeaways Across Publications</p>
+                  <ul class="space-y-1.5 text-xs sm:text-sm text-slate-700">
+                    ${t.perspectives.map(p => `
+                      <li><strong class="text-slate-900">${p.publisher} (${p.author}):</strong> ${p.keyArgument}</li>
+                    `).join("")}
+                  </ul>
+                </div>
+
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button type="button" onclick="navigate('compare', { topicId: '${t.id}' })" class="rounded-xl bg-navy-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-800">
+                    Open Viewpoint Comparison
+                  </button>
+                  <button type="button" onclick="navigate('notes', { topicId: '${t.id}' })" class="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                    Prepare Mains Outline
+                  </button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderBookmarksView() {
+      const savedArticles = ARTICLES_DATA.filter((a) => state.bookmarkedArticleIds.includes(a.id));
+
+      return `
+        <section class="space-y-5">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Saved Bookmarks</h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">${savedArticles.length} bookmarked editorial(s) saved in your browser workspace</p>
+          </div>
+
+          ${savedArticles.length === 0 ? `
+            <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center space-y-3">
+              <p class="text-base font-bold text-slate-900">No bookmarked articles yet</p>
+              <p class="text-xs text-slate-500">Save editorials from Search to build your quick-revision reading folder.</p>
+              <button type="button" onclick="navigate('search')" class="rounded-xl bg-navy-900 px-4 py-2 text-xs font-semibold text-white hover:bg-navy-800">
+                Browse Editorials
+              </button>
+            </div>
+          ` : `
+            <div class="space-y-4">
+              ${savedArticles.map(article => renderArticleCard(article)).join("")}
+            </div>
+          `}
+        </section>
+      `;
+    }
+
+    function renderNotesAndMainsView() {
+      const topic = TOPICS_DATA.find((t) => t.id === state.selectedNoteTopicId) || TOPICS_DATA[0];
+      const outline = topic.mainsOutline;
+      const wordLimit = state.selectedMarks === 10 ? 150 : state.selectedMarks === 15 ? 250 : 300;
+
+      return `
+        <section class="space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Revision Notes &amp; Mains Answer Assistant</h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">Generate structured UPSC Mains frameworks and manage your personal revision notes.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <!-- Mains Answer Structure Assistant (REQ-4.8) -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs space-y-5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-base font-bold text-slate-900">Mains Answer Structure Generator</h2>
+                ${aiDisclaimerBanner("Structural writing aid — avoid verbatim memorization.")}
+              </div>
+
+              <!-- Configuration Controls -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                  <label for="mains-topic" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Topic</label>
+                  <select id="mains-topic" onchange="state.selectedNoteTopicId=this.value; saveState(); render();" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-900">
+                    ${TOPICS_DATA.map(t => `<option value="${t.id}" ${t.id === topic.id ? "selected" : ""}>${t.title}</option>`).join("")}
+                  </select>
+                </div>
+
+                <div>
+                  <label for="mains-paper" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Target Paper</label>
+                  <select id="mains-paper" onchange="state.selectedGsPaper=this.value; saveState(); render();" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-900">
+                    ${["GS-I", "GS-II", "GS-III", "GS-IV", "Essay"].map(p => `<option value="${p}" ${p === state.selectedGsPaper ? "selected" : ""}>${p}</option>`).join("")}
+                  </select>
+                </div>
+
+                <div>
+                  <label for="mains-marks" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Marks &amp; Word Limit</label>
+                  <select id="mains-marks" onchange="state.selectedMarks=Number(this.value); saveState(); render();" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-900">
+                    <option value="10" ${state.selectedMarks === 10 ? "selected" : ""}>10 Marks (150 words)</option>
+                    <option value="15" ${state.selectedMarks === 15 ? "selected" : ""}>15 Marks (250 words)</option>
+                    <option value="20" ${state.selectedMarks === 20 ? "selected" : ""}>20 Marks (300 words)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Structured Answer Framework -->
+              <div class="space-y-4 text-sm text-slate-700">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span class="text-xs font-bold text-navy-900">${state.selectedGsPaper} Framework &bull; ${state.selectedMarks} Marks (~${wordLimit} words)</span>
+                  <button type="button" onclick="saveGeneratedOutlineAsNote()" class="rounded-lg bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-800">
+                    Save Outline to Notes
+                  </button>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-navy-900">1. Introduction</h3>
+                  <p class="mt-1 leading-relaxed">${outline.intro}</p>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-navy-900">2. Background &amp; Context</h3>
+                  <ul class="mt-1 list-disc pl-5 space-y-1">
+                    ${outline.background.map(i => `<li>${i}</li>`).join("")}
+                  </ul>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="rounded-xl bg-emerald-50/60 border border-emerald-200 p-3.5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-900">3. Main Arguments</h3>
+                    <ul class="mt-1.5 list-disc pl-4 space-y-1 text-xs">
+                      ${outline.arguments.map(i => `<li>${i}</li>`).join("")}
+                    </ul>
+                  </div>
+
+                  <div class="rounded-xl bg-rose-50/60 border border-rose-200 p-3.5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-rose-900">4. Key Challenges</h3>
+                    <ul class="mt-1.5 list-disc pl-4 space-y-1 text-xs">
+                      ${outline.challenges.map(i => `<li>${i}</li>`).join("")}
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-navy-900">5. Government Initiatives</h3>
+                  <ul class="mt-1 list-disc pl-5 space-y-1">
+                    ${outline.initiatives.map(i => `<li>${i}</li>`).join("")}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-navy-900">6. Way Forward</h3>
+                  <ul class="mt-1 list-disc pl-5 space-y-1">
+                    ${outline.wayForward.map(i => `<li>${i}</li>`).join("")}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-navy-900">7. Conclusion</h3>
+                  <p class="mt-1 leading-relaxed">${outline.conclusion}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Notes Column -->
+            <div class="space-y-4">
+              <form onsubmit="addCustomNote(event)" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
+                <h2 class="text-sm font-bold text-slate-900">Quick Revision Note</h2>
+                <input id="custom-note-title" type="text" required placeholder="Note title (e.g., PLI Scheme facts)" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-navy-700 focus:outline-none" />
+                <textarea id="custom-note-body" rows="4" required placeholder="Write key takeaways, statistics, or committee names..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-navy-700 focus:outline-none"></textarea>
+                <button type="submit" class="w-full rounded-xl bg-navy-900 py-2 text-xs font-semibold text-white hover:bg-navy-800">
+                  Add Personal Note
+                </button>
+              </form>
+
+              <div class="space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Saved Notes (${state.notes.length})</h3>
+                ${state.notes.map(note => `
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="text-sm font-bold text-slate-900">${note.title}</p>
+                        <p class="text-[11px] text-slate-500">${note.gsPaper} &bull; ${note.createdAt}</p>
+                      </div>
+                      <button type="button" onclick="deleteNote('${note.id}')" aria-label="Delete note" class="text-xs text-slate-400 hover:text-rose-600">
+                        Delete
+                      </button>
+                    </div>
+                    <pre class="whitespace-pre-wrap font-sans text-xs text-slate-700 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">${note.content}</pre>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPracticeView() {
+      return `
+        <section class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Practice Questions (Prelims &amp; Mains)</h1>
+              <p class="text-xs sm:text-sm text-slate-600 mt-0.5">Grounded strictly in processed editorial themes &bull; Questions practiced: <strong>${state.questionsPracticedCount}</strong></p>
+            </div>
+            ${aiDisclaimerBanner("AI-generated practice questions — verify facts with original sources.")}
+          </div>
+
+          <!-- Prelims MCQs -->
+          <div class="space-y-4">
+            <h2 class="text-base font-bold text-slate-900">Prelims-Style MCQs</h2>
+            ${PRACTICE_QUESTIONS.map((mcq, qIdx) => {
+              const selected = state.answeredMcqs[mcq.id];
+              const isAnswered = selected !== undefined;
+              return `
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xs space-y-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="rounded-md bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[11px] font-bold text-navy-900">${mcq.examTag}</span>
+                    <span class="text-xs text-slate-500">${mcq.topic}</span>
+                  </div>
+
+                  <p class="text-sm font-semibold text-slate-900 whitespace-pre-line leading-relaxed">Q${qIdx + 1}. ${mcq.question}</p>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    ${mcq.options.map((opt, optIdx) => {
+                      let btnStyle = "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800";
+                      if (isAnswered) {
+                        if (optIdx === mcq.correctIndex) {
+                          btnStyle = "border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold";
+                        } else if (optIdx === selected) {
+                          btnStyle = "border-rose-400 bg-rose-50 text-rose-950";
+                        } else {
+                          btnStyle = "border-slate-200 bg-white text-slate-400";
+                        }
+                      }
+                      return `
+                        <button
+                          type="button"
+                          ${isAnswered ? "disabled" : ""}
+                          onclick="selectMcqOption('${mcq.id}', ${optIdx})"
+                          class="text-left rounded-xl border px-4 py-3 text-xs sm:text-sm transition ${btnStyle}"
+                        >
+                          <span class="font-bold mr-2">(${String.fromCharCode(65 + optIdx)})</span>${opt}
+                        </button>
+                      `;
+                    }).join("")}
+                  </div>
+
+                  ${isAnswered ? `
+                    <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 space-y-1.5">
+                      <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold ${selected === mcq.correctIndex ? "text-emerald-700" : "text-rose-700"}">
+                          ${selected === mcq.correctIndex ? "Correct Answer!" : `Incorrect — Correct Option is (${String.fromCharCode(65 + mcq.correctIndex)})`}
+                        </p>
+                        <button type="button" onclick="resetMcq('${mcq.id}')" class="text-xs font-semibold text-navy-900 hover:underline">Retry</button>
+                      </div>
+                      <p class="text-xs text-slate-700 leading-relaxed">${mcq.explanation}</p>
+                      <p class="text-[11px] text-slate-500 pt-1">Reference: ${mcq.sourceRef}</p>
+                    </div>
+                  ` : ""}
+                </div>
+              `;
+            }).join("")}
+          </div>
+
+          <!-- Mains & Essay Prompts -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs space-y-4">
+            <h2 class="text-base font-bold text-slate-900">Mains &amp; Essay Practice Prompts</h2>
+            <div class="divide-y divide-slate-100">
+              <div class="py-3 first:pt-0 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-bold uppercase text-amber-800">GS-II &bull; 15 Marks (250 Words)</span>
+                  <p class="text-sm font-medium text-slate-900 mt-0.5">"Tactical border disengagement cannot substitute for long-term strategic trust and supply-chain resilience." Critically examine in the context of India–China relations.</p>
+                </div>
+                <button type="button" onclick="navigate('notes', { topicId: 'india-china' })" class="rounded-xl bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-800 shrink-0">
+                  View Structure
+                </button>
+              </div>
+
+              <div class="py-3 last:pb-0 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-bold uppercase text-amber-800">GS-III &bull; 15 Marks (250 Words)</span>
+                  <p class="text-sm font-medium text-slate-900 mt-0.5">Examine the structural bottlenecks in India's semiconductor fabrication ecosystem and suggest measures beyond capital subsidies to build domestic resilience.</p>
+                </div>
+                <button type="button" onclick="navigate('notes', { topicId: 'semiconductor-mission' })" class="rounded-xl bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-800 shrink-0">
+                  View Structure
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    /* =========================================================================
+       6. MAIN RENDER LOOP & INITIALIZATION
+       ========================================================================= */
+    function render() {
+      // Highlight active navigation link
+      document.querySelectorAll(".nav-btn").forEach((btn) => {
+        const isActive = btn.getAttribute("data-nav") === state.activeRoute;
+        btn.className = `nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-left ${
+          isActive
+            ? "bg-navy-700 text-white shadow-2xs"
+            : "text-slate-300 hover:bg-navy-800 hover:text-white"
+        }`;
+      });
+
+      const main = document.getElementById("app-main");
+      switch (state.activeRoute) {
+        case "search":
+          main.innerHTML = renderSearchView();
+          break;
+        case "compare":
+          main.innerHTML = renderCompareView();
+          break;
+        case "digest":
+          main.innerHTML = renderDigestView();
+          break;
+        case "bookmarks":
+          main.innerHTML = renderBookmarksView();
+          break;
+        case "notes":
+          main.innerHTML = renderNotesAndMainsView();
+          break;
+        case "practice":
+          main.innerHTML = renderPracticeView();
+          break;
+        case "dashboard":
+        default:
+          main.innerHTML = renderDashboardView();
+          break;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("exam-selector").value = state.selectedExam;
+      document.getElementById("global-search-input").value = state.searchQuery;
+      updateSidebarCounters();
+      render();
+    });
+  </script>
+</body>
+</html>
